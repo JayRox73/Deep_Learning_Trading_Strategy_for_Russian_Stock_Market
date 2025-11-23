@@ -1,0 +1,32 @@
+# Секреты
+.env
+*.env
+.env.*
+
+# Jupyter
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/*
+
+# Выводы в ноутбуках (опционально, если не используешь nbstripout)
+# *.ipynb и в них "output": [...]
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+.coverage
+.coverage.*
+.tox
+.nox
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.log
