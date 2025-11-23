@@ -1,4 +1,4 @@
-# Секреты
+# Tokens and Keys
 .env
 *.env
 .env.*
@@ -6,9 +6,6 @@
 # Jupyter
 .ipynb_checkpoints/
 */.ipynb_checkpoints/*
-
-# Выводы в ноутбуках (опционально, если не используешь nbstripout)
-# *.ipynb и в них "output": [...]
 
 # Python
 __pycache__/
