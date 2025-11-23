@@ -27,3 +27,6 @@ nosetests.xml
 coverage.xml
 *.cover
 *.log
+
+#MacOs
+*.DS_Store
