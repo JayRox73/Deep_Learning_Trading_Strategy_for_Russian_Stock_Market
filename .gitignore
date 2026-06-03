@@ -30,3 +30,9 @@ coverage.xml
 
 #MacOs
 *.DS_Store
+
+# Folders
+data/
+.vscode/
+catboost_info/
+Master_Thesis_Results/
