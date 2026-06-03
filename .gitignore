@@ -13,6 +13,8 @@ __pycache__/
 *.pyo
 *.pyd
 .Python
+trade_env/
+.vscode/
 env/
 venv/
 .venv/
@@ -33,6 +35,5 @@ coverage.xml
 
 # Folders
 data/
-.vscode/
 catboost_info/
 Master_Thesis_Results/
