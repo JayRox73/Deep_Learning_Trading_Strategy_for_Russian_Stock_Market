@@ -46,7 +46,8 @@ The goal of this project was to evaluate whether deep learning architectures can
 
 * Source: Tinkoff Invest API
 * Frequency: 5-minute candles
-* Period: 2024–2025
+* Train Period: 2020–2023
+* Test Period: 2024–2025
 * Assets:
 
   * SBER
@@ -229,7 +230,7 @@ In addition, statistical significance was assessed through Minimal Detectable Ef
 * Optuna
 * PyWavelets
 * Matplotlib
-* Plotly
+* Seaborn
 
 ---
 
@@ -237,15 +238,7 @@ In addition, statistical significance was assessed through Minimal Detectable Ef
 
 ```text
 .
-├── data/
 ├── notebooks/
-├── src/
-│   ├── data/
-│   ├── features/
-│   ├── models/
-│   ├── training/
-│   ├── backtesting/
-│   └── utils/
 ├── results/
 ├── thesis/
 ├── presentation/
@@ -273,4 +266,4 @@ Alexey Smirnov
 
 Master's Thesis in Data Science / Quantitative Finance
 
-2025
+2026
