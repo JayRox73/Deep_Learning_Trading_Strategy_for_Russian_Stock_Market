@@ -264,6 +264,6 @@ Potential directions for further research:
 
 Alexey Smirnov
 
-Master's Thesis in Data Science / Quantitative Finance
+Master's Thesis in Data Analysis / Quantitative Finance
 
 2026
