@@ -34,6 +34,8 @@ coverage.xml
 *.DS_Store
 
 # Folders
-data/
+FQW/data/
+FQW/Models/
 catboost_info/
-Master_Thesis_Results/
+FQW/Non Sorted Results/
+FQW/Final results for Thesis/
