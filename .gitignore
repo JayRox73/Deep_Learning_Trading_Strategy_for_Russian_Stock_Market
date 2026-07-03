@@ -29,14 +29,23 @@ nosetests.xml
 coverage.xml
 *.cover
 *.log
+*.egg-info/
+dist/
+build/
 
-#MacOs
+# macOS
 *.DS_Store
 
-# Folders
+# Experiment outputs
+catboost_info/
+results/
+
+# Data (stored outside repo or via symlink)
+/data/
+
+# Legacy paths (parent workspace)
 FQW/data/
 FQW/Models/
-catboost_info/
 FQW/Non Sorted Results/
 FQW/Final results for Thesis/
 

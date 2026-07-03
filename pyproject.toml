@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fqw"
+version = "1.0.0"
+description = "Deep learning trading strategies for the Russian stock market (master's thesis)"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Apache-2.0" }
+dependencies = [
+  "numpy",
+  "pandas",
+  "scikit-learn",
+  "tensorflow>=2.15",
+  "PyWavelets",
+  "pyarrow",
+  "python-dotenv",
+  "matplotlib",
+  "seaborn",
+  "scipy",
+  "python-dateutil",
+]
+
+[project.optional-dependencies]
+baseline = ["lightgbm", "catboost", "optuna"]
+data = ["tinkoff-investments", "fastparquet", "jupyter", "ipykernel"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
