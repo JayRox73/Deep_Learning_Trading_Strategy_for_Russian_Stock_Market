@@ -1,269 +1,304 @@
-# Deep Learning-Based Trading Strategies for the Russian Stock Market
+# Deep Learning Trading Strategies for the Russian Stock Market
 
-Master's thesis project focused on developing and evaluating machine learning and deep learning models for intraday trading in the Russian stock market.
+[![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
+[![TensorFlow 2.15](https://img.shields.io/badge/TensorFlow-2.15-orange.svg)](https://www.tensorflow.org/)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-green.svg)](LICENSE)
 
-The project investigates whether modern deep learning architectures can extract economically meaningful trading signals from noisy financial time series and outperform traditional machine learning approaches under realistic market conditions.
+Research codebase for a master's thesis (ITMO University, 2026) on **intraday trading strategies** for the Moscow Exchange (MOEX). The project compares classical ML baselines and several deep learning architectures on 5-minute OHLCV data.
 
----
-
-## Key Results
-
-| Model                      | Asset      | Return |
-| -------------------------- | ---------- | ------ |
-| MLP                        | GLDRUB_TOM | 78.92% |
-| BiLSTM + Attention         | YDEX       | 57.77% |
-| 1D CNN + Wavelet Denoising | YDEX       | 53.42% |
-
-### Main Findings
-
-* Deep learning models consistently outperformed traditional machine learning approaches.
-* Wavelet denoising significantly improved CNN performance on intraday market data.
-* Adaptive volatility-based labeling improved class balance and reduced noise sensitivity.
-* Macroeconomic features did not improve high-frequency trading performance.
-* Statistical significance does not necessarily imply economic significance.
-* Risk management and market regime filtering contributed more to robustness than marginal improvements in predictive accuracy.
+> **Disclaimer.** This repository is academic research code, not financial advice. Past backtest performance does not guarantee future results.
 
 ---
 
-## Research Motivation
+## Experimental Results
 
-Financial markets are characterized by:
+All figures below are from the **previous research pipeline** (pre-refactor notebooks). Evaluation window for DL models: **2024-01-01 — 2026-01-01**, walk-forward backtests with commission **0.03%**. Baseline track uses a separate regression setup (4 years train / 2 years test, z-score signals).
 
-* high noise levels;
-* non-stationary behavior;
-* changing market regimes;
-* low signal-to-noise ratio.
+### Best strategies per ticker (DL models)
 
-Traditional machine learning models often achieve acceptable predictive metrics while failing to generate profitable trading strategies.
+| Ticker | Model | Return | Sharpe | Max DD | WFS | Significant |
+|--------|-------|--------|--------|--------|-----|-------------|
+| **GLDRUB_TOM** | MLP (wo TIs) | **78.92%** | 0.81 | −13.8% | 0.84 | Yes |
+| **YDEX** | LSTM Attention (v2) | **57.77%** | 0.67 | −16.8% | 0.65 | Yes |
+| **YDEX** | CNN (Wavelet wo TIs) | **53.42%** | 0.47 | −15.7% | 0.57 | Yes |
+| **SBER** | LSTM Attention (v2) | **36.18%** | 0.37 | −4.1% | 0.88 | Yes |
+| **GLDRUB_TOM** | CNN (Wavelet wo TIs) | 32.84% | 0.15 | −8.1% | 0.84 | Yes |
+| **GLDRUB_TOM** | LSTM Attention (v2 TIs) | 30.71% | 0.51 | −13.2% | 0.53 | No |
+| **GLDRUB_TOM** | CNN (w TIs) | 28.16% | 0.51 | −9.3% | 0.54 | Yes |
+| **SBER** | MLP (wo TIs) | 28.85% | 0.08 | −24.1% | 0.58 | No |
+| **LKOH** | CNN (wo TIs) | 20.49% | −0.24 | −10.4% | 0.50 | No |
 
-The goal of this project was to evaluate whether deep learning architectures can capture nonlinear temporal dependencies and generate statistically significant and economically meaningful trading signals.
+### Full results by ticker
 
----
+<details>
+<summary><b>GLDRUB_TOM</b></summary>
 
-## Dataset
+| Model | Return | Sharpe | Max DD | WFS | Signif. |
+|-------|--------|--------|--------|-----|---------|
+| MLP (wo TIs) | 78.92% | 0.81 | −13.8% | 0.84 | Yes |
+| CNN (Wavelet wo TIs) | 32.84% | 0.15 | −8.1% | 0.84 | Yes |
+| LSTM Attention (v2 TIs) | 30.71% | 0.51 | −13.2% | 0.53 | No |
+| CNN (w TIs) | 28.16% | 0.51 | −9.3% | 0.54 | Yes |
+| MLP (w TIs) | 23.60% | 0.28 | −16.1% | 0.53 | No |
+| LSTM Attention (v2) | 20.24% | −0.22 | −12.3% | 0.94 | No |
+| CNN (wo TIs) | 20.96% | −0.31 | −8.5% | 0.49 | Yes |
+| CDT 1-D CNN (wo TIs) | 13.19% | −0.43 | −14.1% | 0.82 | No |
 
-### Market Data
+</details>
 
-* Source: Tinkoff Invest API
-* Frequency: 5-minute candles
-* Train Period: 2020–2023
-* Test Period: 2024–2025
-* Assets:
+<details>
+<summary><b>YDEX</b></summary>
 
-  * SBER
-  * LKOH
-  * YDEX
-  * GLDRUB_TOM
-  * additional liquid Russian securities
+| Model | Return | Sharpe | Max DD | WFS | Signif. |
+|-------|--------|--------|--------|-----|---------|
+| LSTM Attention (v2) | 57.77% | 0.67 | −16.8% | 0.65 | Yes |
+| MLP (wo TIs) | 57.70% | 0.40 | −35.9% | 0.61 | No |
+| CNN (Wavelet wo TIs) | 53.42% | 0.47 | −15.7% | 0.57 | Yes |
+| MLP (w TIs) | 39.22% | 0.26 | −23.4% | 0.53 | No |
+| CNN (w TIs) | 36.86% | 0.24 | −23.1% | 0.54 | No |
+| CDT 1-D CNN (wo TIs) | 32.55% | 0.12 | −25.2% | 0.61 | No |
+| CNN (wo TIs) | 10.96% | −0.35 | −24.8% | 0.50 | No |
+| LSTM Attention (v2 TIs) | 10.05% | −0.19 | −30.8% | 0.52 | No |
 
-### Features
+</details>
 
-#### Market Features
+<details>
+<summary><b>SBER</b></summary>
 
-* Open
-* High
-* Low
-* Close
-* Volume
+| Model | Return | Sharpe | Max DD | WFS | Signif. |
+|-------|--------|--------|--------|-----|---------|
+| LSTM Attention (v2) | 36.18% | 0.37 | −4.1% | 0.88 | Yes |
+| MLP (wo TIs) | 28.85% | 0.08 | −24.1% | 0.58 | No |
+| CNN (Wavelet wo TIs) | 3.95% | −0.57 | −17.9% | 0.56 | No |
+| CNN (wo TIs) | −1.93% | −0.95 | −19.7% | 0.45 | No |
+| CDT 1-D CNN (wo TIs) | −7.47% | −0.97 | −21.0% | 0.61 | No |
+| CNN (w TIs) | −12.05% | −0.79 | −19.3% | 0.53 | No |
+| MLP (w TIs) | −12.05% | −1.09 | −23.7% | 0.52 | No |
+| LSTM Attention (v2 TIs) | −22.93% | −0.99 | −28.3% | 0.55 | No |
 
-#### Technical Indicators
+</details>
 
-* RSI
-* MACD
-* ATR
-* Bollinger Bands
-* Moving Averages
+<details>
+<summary><b>LKOH</b></summary>
 
-#### Context Features
+| Model | Return | Sharpe | Max DD | WFS | Signif. |
+|-------|--------|--------|--------|-----|---------|
+| CNN (wo TIs) | 20.49% | −0.24 | −10.4% | 0.50 | No |
+| LSTM Attention (v2) | −4.36% | −1.02 | −17.0% | 0.63 | No |
+| CNN (w TIs) | −4.99% | −1.31 | −12.8% | 0.61 | No |
+| LSTM Attention (v2 TIs) | −3.66% | −1.55 | −20.2% | 0.66 | No |
+| MLP (wo TIs) | −19.20% | −0.73 | −38.8% | 0.59 | No |
+| MLP (w TIs) | −27.97% | −1.14 | −36.4% | 0.51 | No |
+| CDT 1-D CNN (wo TIs) | −33.76% | −1.72 | −46.8% | 0.60 | No |
+| CNN (Wavelet wo TIs) | −43.12% | −1.75 | −49.4% | 0.52 | No |
 
-* MOEX Index
-* Relative Strength
-* Market Volatility
-* Key Interest Rate
-* Inflation
+</details>
 
----
+### Classical ML baseline (best per ticker)
 
-## Adaptive Volatility Labeling
+| Ticker | Best model | Return | Sharpe | Win Rate | Trades |
+|--------|------------|--------|--------|----------|--------|
+| YDEX | CatBoost | 42.64% | 2.77 | 45.2% | 498 |
+| YDEX | Ridge | 42.21% | 10.72 | 60.4% | 91 |
+| TATN | Ridge | 31.55% | 16.35 | 68.8% | 48 |
+| SBER | CatBoost | 14.45% | 2.31 | 51.9% | 295 |
+| LKOH | Ridge | 4.60% | 13.42 | 69.6% | 23 |
 
-A custom dynamic labeling framework was developed.
-
-Instead of using fixed thresholds, future returns are compared against local volatility estimates:
-
-* Up
-* Down
-* Flat
-
-This approach adapts class boundaries to current market conditions and improves robustness across different volatility regimes.
-
----
-
-## Models Evaluated
-
-### Traditional Machine Learning
-
-* Ridge Regression
-* Lasso Regression
-* LightGBM
-* CatBoost
-
-### Deep Learning
-
-#### Deep MLP
-
-Fully connected neural network trained on engineered features.
-
-#### Regular 1D CNN
-
-Convolutional architecture designed to extract local temporal patterns from financial time series.
-
-#### BiLSTM + Attention
-
-Bidirectional recurrent architecture capable of capturing long-term dependencies and temporal context.
-
-#### CDT 1D CNN
-
-Cross-Data-Type CNN incorporating market context and macroeconomic information.
+> DL models with wavelet denoising and MLP showed the strongest risk-adjusted results on **GLDRUB_TOM** and **YDEX**. Classical baselines were competitive on **YDEX** (Ridge/CatBoost) but underperformed on gold. LKOH remained challenging across all architectures.
 
 ---
 
-## Experimental Design
+## What This Repo Contains
 
-### Walk-Forward Validation
+The project is organized as a **Python library** (`src/fqw/`) plus **thin Jupyter notebooks** that orchestrate experiments. Core logic lives in the library; notebooks are entry points.
 
-A realistic rolling evaluation framework was implemented:
+```
+┌─────────────────────────────────────────────────────────────┐
+│  notebooks/          Thin orchestrators (Run All)           │
+│  01 … 08             import fqw, set config, call runners   │
+└──────────────────────────┬──────────────────────────────────┘
+                           │
+┌──────────────────────────▼──────────────────────────────────┐
+│  src/fqw/            Reusable library                       │
+│  data · features · labeling · datasets · models             │
+│  training · backtest · experiments · viz                    │
+└──────────────────────────┬──────────────────────────────────┘
+                           │
+┌──────────────────────────▼──────────────────────────────────┐
+│  data/               5-min parquet candles (not in git)     │
+│  results/            Backtest CSV / probability parquet     │
+└─────────────────────────────────────────────────────────────┘
+```
 
-* 48 months training window
-* 1 month testing window
-* incremental retraining
+### Research Tracks
 
-This prevents look-ahead bias and better approximates real trading conditions.
+| # | Notebook | Description | Library entry point |
+|---|----------|-------------|---------------------|
+| 01 | `01_dataset_formation.ipynb` | Download candles via Tinkoff Invest API | `fqw.data.api` |
+| 02 | `02_baseline.ipynb` | Ridge, Lasso, LightGBM, CatBoost + Optuna | `fqw.experiments.baseline` |
+| 03 | `03_models_cnn.ipynb` | **Main pipeline:** wavelet + 1D CNN | `fqw.experiments.batch_cnn` |
+| 04 | `04_mlp.ipynb` | Deep MLP, record-based windows | `fqw.experiments.mlp` |
+| 05 | `05_cdt_macro.ipynb` | CDT 1D CNN + macro feature ablation | `fqw.experiments.cdt_macro` |
+| 06 | `06_visualization.ipynb` | Equity curves, metrics, heatmaps | `fqw.viz` |
+| 08 | `08_alpha_search.ipynb` | Per-ticker optimal labeling alpha | `fqw.labeling.alpha_search` |
 
-### Trading Assumptions
-
-Transaction costs were explicitly modeled:
-
-* Commission: 0.03%
-* Slippage: 0.02%
-
-All reported results include these costs.
-
----
-
-## Noise Reduction
-
-To reduce microstructure noise, wavelet denoising was applied using:
-
-* Symlet 4 wavelet
-* Level 3 decomposition
-
-### Example Impact
-
-YDEX (CNN):
-
-* Without denoising: 10.96%
-  return
-* With denoising: 53.42%
-  return
-
-This suggests that a significant portion of intraday price fluctuations represents noise rather than useful information.
+Legacy monolithic notebooks are preserved in `archive/*_legacy.ipynb` for reference.
 
 ---
 
-## Risk Management
+## Quick Start
 
-The project includes a dynamic breakeven mechanism.
+### 1. Clone and install
 
-Features:
+```bash
+git clone https://github.com/JayRox73/Deep_Learning_Trading_Strategy_for_Russian_Stock_Market.git
+cd Deep_Learning_Trading_Strategy_for_Russian_Stock_Market
 
-* Adaptive stop-loss management
-* Breakeven protection
-* Position exit logic
-* Volatility-aware risk control
+python3 -m venv .venv
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 
-Results:
+pip install -r requirements.txt
+pip install -e .
+```
 
-* Win Rate improved from 37.64% to 52.10%
-* Reduction in large losing trades
-* Improved equity curve stability
+Alternative (extras via pyproject):
 
----
+```bash
+pip install -e ".[baseline,data]"
+```
 
-## Statistical Significance
+### 2. Prepare market data
 
-Performance was evaluated using:
+**Option A — use existing parquet files**
 
-* Total Return
-* Sharpe Ratio
-* Profit Factor
-* Maximum Drawdown
-* Win Rate
-* Trade Count
-
-In addition, statistical significance was assessed through Minimal Detectable Effect (MDE) analysis to distinguish genuine predictive signals from random outcomes.
-
----
-
-## Key Conclusions
-
-1. Traditional machine learning models failed to consistently extract profitable signals from 5-minute Russian market data.
-
-2. Deep learning architectures demonstrated superior ability to model nonlinear market behavior.
-
-3. Wavelet denoising produced substantial improvements for CNN-based strategies.
-
-4. Macroeconomic variables provided limited value for high-frequency trading models.
-
-5. The primary practical value of deep learning lies in adaptive risk management and market regime filtering rather than serving as a standalone source of alpha.
-
----
-
-## Technologies Used
-
-* Python
-* PyTorch
-* Scikit-Learn
-* Pandas
-* NumPy
-* LightGBM
-* CatBoost
-* Optuna
-* PyWavelets
-* Matplotlib
-* Seaborn
-
----
-
-## Repository Structure
+Place 5-minute candles in `data/` (or symlink to your data folder):
 
 ```text
-.
-├── notebooks/
-├── results/
-├── thesis/
-├── presentation/
-└── README.md
+data/
+├── SBER_5min.parquet
+├── YDEX_5min.parquet
+├── LKOH_5min.parquet
+└── MOEX_1day.parquet      # required for CDT macro experiments (05)
+```
+
+**Option B — download via API**
+
+Create `.env` in the project root:
+
+```env
+TOKEN=your_tinkoff_invest_api_token
+```
+
+Then open and run `notebooks/01_dataset_formation.ipynb`.
+
+### 3. Run an experiment
+
+**Via Jupyter (recommended):**
+
+```bash
+jupyter notebook notebooks/
+```
+
+Open the notebook you need and run all cells. Paths in notebooks are relative to `notebooks/` (`../data`, `../results`).
+
+**Via Python:**
+
+```python
+from fqw.config import CNNConfig
+from fqw.experiments import run_batch_backtest_to_csv
+
+cfg = CNNConfig(data_dir="data")
+
+run_batch_backtest_to_csv(
+    tickers=["YDEX"],
+    alpha=1.0,
+    confidence_threshold=0.75,
+    config=cfg,
+    use_wavelet=True,
+    filename="results/cnn_yndx_smoke.csv",
+)
 ```
 
 ---
 
-## Future Work
+## Repository Layout
 
-Potential directions for further research:
+```text
+.
+├── src/fqw/                  # Core library
+│   ├── config.py             # CNNConfig, MLPConfig, CDTConfig, BaselineConfig
+│   ├── data/                 # API, loading, cleaning, resampling
+│   ├── features/             # Technical indicators, wavelet, macro, baseline
+│   ├── labeling/             # Volatility labels, alpha search
+│   ├── datasets/             # Tensor builders (CNN / MLP / CDT)
+│   ├── models/               # CNN, MLP, CDT architectures
+│   ├── training/             # Walk-forward and moving-window trainers
+│   ├── backtest/             # Trade analysis, risk rules
+│   ├── metrics/              # Weighted F-score and classification metrics
+│   ├── experiments/          # High-level experiment runners
+│   └── viz/                  # Results scanning and plotting
+├── notebooks/                # Thin orchestrators — start here
+├── archive/                  # Legacy notebooks (pre-refactor)
+├── data/                     # Market data (gitignored; symlink OK)
+├── results/                  # Experiment outputs (gitignored)
+├── pyproject.toml
+└── requirements.txt
+```
 
-* Transformer-based architectures
-* Market regime detection models
-* Reinforcement learning approaches
-* Multi-asset portfolio optimization
-* News and sentiment integration
-* Cross-market transfer learning
+---
+
+## Methodology (Summary)
+
+| Aspect | Setting |
+|--------|---------|
+| **Data** | 5-minute MOEX candles, 2020–2026 |
+| **Walk-forward** | 48 months train → 1 month test → retrain |
+| **Labels** | Adaptive volatility: Up (1) / Down (2) / Flat (0) |
+| **CNN preprocessing** | Symlet-4 wavelet denoising, level 3 |
+| **Costs** | Commission 0.03%; slippage 0.02% (baseline track) |
+| **Risk management** | Breakeven stop, minimum hold period |
+| **Metrics** | Sharpe, profit factor, weighted F-score, win rate |
+
+Three DL tracks use **different tensor pipelines** (per-window scaler for CNN, session scaler for MLP, global z-score for CDT). Each architecture was tuned for its own pipeline.
+
+### Default thesis tickers
+
+`SBER`, `MGNT`, `VTBR`, `TATN`, `LKOH`, `YDEX`, `GLDRUB_TOM`
+
+Configure via `CNNConfig`, `MLPConfig`, `CDTConfig`, or `BaselineConfig` in `src/fqw/config.py`.
+
+---
+
+## Common Issues
+
+| Problem | Solution |
+|---------|----------|
+| `ModuleNotFoundError: fqw` | Run `pip install -e .` from repo root |
+| `FileNotFoundError` for parquet | Check `data_dir` — use `../data` from notebooks, `data` from repo root |
+| CDT macro fails | Ensure `MOEX_1day.parquet` exists in `data/` |
+| Empty visualization | Run model notebooks first; outputs go to `results/` as `*_probs.parquet` |
+| Tinkoff API errors | Verify `TOKEN` in `.env`; respect API rate limits |
+
+---
+
+## Tech Stack
+
+- **Python** 3.10+
+- **TensorFlow / Keras** 2.15 — CNN, MLP, CDT
+- **scikit-learn**, **pandas**, **numpy**, **PyWavelets**, **scipy**
+- **LightGBM**, **CatBoost**, **Optuna** — baseline track
+- **Tinkoff Invest API** — historical data download
 
 ---
 
 ## Author
 
-Alexey Smirnov
+**Alexey Smirnov**  
+Master's Thesis — Data Analysis / Quantitative Finance  
+ITMO University, 2026
 
-Master's Thesis in Data Analysis / Quantitative Finance
+---
 
-2026
+## License
+
+[Apache License 2.0](LICENSE)
