@@ -10,6 +10,20 @@ Research codebase for a master's thesis (ITMO University, 2026) on **intraday tr
 
 ---
 
+## Thesis Documents
+
+Full thesis materials (PDF) are in [`docs/`](docs/):
+
+| File | Description |
+|------|-------------|
+| [`thesis_final_ru.pdf`](docs/thesis_final_ru.pdf) | Final master's thesis (VKR), Russian |
+| [`thesis_defense_presentation_ru.pdf`](docs/thesis_defense_presentation_ru.pdf) | Defense presentation (Smirnov A.E.) |
+| [`thesis_draft_en.pdf`](docs/thesis_draft_en.pdf) | Early English draft — *Financial Markets Prediction with Deep Learning* |
+
+**Thesis title (RU):** стратегии глубокого обучения для торговли на российском фондовом рынке.
+
+---
+
 ## Experimental Results
 
 All figures below are from the **previous research pipeline** (pre-refactor notebooks). Evaluation window for DL models: **2024-01-01 — 2026-01-01**, walk-forward backtests with commission **0.03%**. Baseline track uses a separate regression setup (4 years train / 2 years test, z-score signals).
@@ -238,6 +252,7 @@ run_batch_backtest_to_csv(
 │   ├── experiments/          # High-level experiment runners
 │   └── viz/                  # Results scanning and plotting
 ├── notebooks/                # Thin orchestrators — start here
+├── docs/                     # Thesis PDFs (final, presentation, EN draft)
 ├── archive/                  # Legacy notebooks (pre-refactor)
 ├── data/                     # Market data (gitignored; symlink OK)
 ├── results/                  # Experiment outputs (gitignored)
