@@ -57,16 +57,12 @@ def analyze_trades(df: pd.DataFrame, commission: float = 0.0003, rf_annual: floa
 
     avg_win = pnls[pnls > 0].mean() if (pnls > 0).any() else 0
     avg_loss = abs(pnls[pnls < 0].mean()) if (pnls < 0).any() else 0
-    avg_rr = avg_win / avg_loss if avg_loss != 0 else np.inf
+    _avg_rr = avg_win / avg_loss if avg_loss != 0 else np.inf
 
     avg_duration_years = trades_df["Duration Years"].mean()
-    rf_per_trade = (
-        rf_annual / (1 / avg_duration_years) if avg_duration_years > 0 else 0
-    )
+    rf_per_trade = rf_annual / (1 / avg_duration_years) if avg_duration_years > 0 else 0
     std_pnl = pnls.std()
-    sharpe = (
-        (pnls.mean() - rf_per_trade) / std_pnl * np.sqrt(n) if std_pnl > 0 else 0
-    )
+    sharpe = (pnls.mean() - rf_per_trade) / std_pnl * np.sqrt(n) if std_pnl > 0 else 0
     mde = 2.8 * std_pnl / np.sqrt(n) if n > 1 else 0
     stat_significant = abs(pnls.mean()) > mde
 

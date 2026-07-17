@@ -8,7 +8,6 @@ from fqw.backtest.mlp import backtest_mlp_probabilities
 from fqw.config import MLPConfig
 from fqw.data.loading import load_ticker_5min, preprocess_ticker
 from fqw.features.technical import add_technical_indicators
-from fqw.models.mlp import build_mlp_model
 from fqw.training.moving_window import run_moving_window_backtest
 
 

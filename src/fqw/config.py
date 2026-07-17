@@ -92,7 +92,16 @@ CDT_EXPERIMENTS = [
     {"name": "CDT OHLCV", "features": ["Open", "High", "Low", "Close", "Volume"]},
     {
         "name": "CDT + MOEX",
-        "features": ["Open", "High", "Low", "Close", "Volume", "MOEX_Close", "MOEX_Vol_20d", "Relative_Strength"],
+        "features": [
+            "Open",
+            "High",
+            "Low",
+            "Close",
+            "Volume",
+            "MOEX_Close",
+            "MOEX_Vol_20d",
+            "Relative_Strength",
+        ],
     },
     {
         "name": "CDT + Rate/Infl",
@@ -101,8 +110,16 @@ CDT_EXPERIMENTS = [
     {
         "name": "CDT + All Macro",
         "features": [
-            "Open", "High", "Low", "Close", "Volume",
-            "MOEX_Close", "MOEX_Vol_20d", "Relative_Strength", "KeyRate", "Inflation",
+            "Open",
+            "High",
+            "Low",
+            "Close",
+            "Volume",
+            "MOEX_Close",
+            "MOEX_Vol_20d",
+            "Relative_Strength",
+            "KeyRate",
+            "Inflation",
         ],
     },
 ]
@@ -127,5 +144,9 @@ class BaselineConfig:
     data_dir: Path = field(default_factory=lambda: Path("data"))
     start_date: str = "2020-01-01"
     end_date: str = "2026-01-01"
-    target_tickers: list[str] = field(default_factory=lambda: ["SBER", "LKOH", "YDEX", "GLDRUB_TOM"])
-    model_names: list[str] = field(default_factory=lambda: ["Ridge", "Lasso", "LightGBM", "CatBoost"])
+    target_tickers: list[str] = field(
+        default_factory=lambda: ["SBER", "LKOH", "YDEX", "GLDRUB_TOM"]
+    )
+    model_names: list[str] = field(
+        default_factory=lambda: ["Ridge", "Lasso", "LightGBM", "CatBoost"]
+    )

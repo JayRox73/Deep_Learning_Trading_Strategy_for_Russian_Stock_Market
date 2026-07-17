@@ -3,7 +3,6 @@
 import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import Optional
 
 import pandas as pd
 
@@ -22,6 +21,7 @@ def _require_tinkoff():
     try:
         from tinkoff.invest import CandleInterval, Client
         from tinkoff.invest.utils import quotation_to_decimal
+
         return Client, CandleInterval, quotation_to_decimal
     except ImportError as exc:
         raise ImportError("Install optional dependency: pip install -e '.[data]'") from exc
@@ -71,7 +71,9 @@ def get_candles_data(
         df["DateTime"] = pd.to_datetime(df["DateTime"]).dt.tz_localize(None)
         if not df.empty:
             cache_min, cache_max = df["DateTime"].min(), df["DateTime"].max()
-            if (cache_min <= start_date and cache_max >= end_date - timedelta(minutes=1)) or not update_cache:
+            if (
+                cache_min <= start_date and cache_max >= end_date - timedelta(minutes=1)
+            ) or not update_cache:
                 mask = (df["DateTime"] >= start_date) & (df["DateTime"] <= end_date)
                 return df.loc[mask].sort_values("DateTime", ascending=False)
 

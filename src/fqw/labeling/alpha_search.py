@@ -78,7 +78,10 @@ def run_alpha_search(
             df = fill_time_gaps(df)
             df = clean_market_data(df)
             row = find_optimal_alpha(
-                df, window_size=window_size, target_flat_pct=target_flat_pct, alphas_range=alphas_range
+                df,
+                window_size=window_size,
+                target_flat_pct=target_flat_pct,
+                alphas_range=alphas_range,
             )
             if row:
                 row["Ticker"] = ticker
@@ -98,7 +101,9 @@ def summarize_alpha_search(res_df: pd.DataFrame) -> None:
         return
     mean_alpha = res_df["Best_Alpha"].mean()
     median_alpha = res_df["Best_Alpha"].median()
-    mode_alpha = res_df["Best_Alpha"].mode().iloc[0] if not res_df["Best_Alpha"].mode().empty else None
+    mode_alpha = (
+        res_df["Best_Alpha"].mode().iloc[0] if not res_df["Best_Alpha"].mode().empty else None
+    )
     print("=" * 70)
     print(f"Optimal alpha summary ({len(res_df)} tickers)")
     print("=" * 70)
@@ -107,6 +112,10 @@ def summarize_alpha_search(res_df: pd.DataFrame) -> None:
     print(f"Mode:   {mode_alpha}")
     print(res_df["Best_Alpha"].describe())
     print("\nLowest alpha (noisiest):")
-    print(res_df.nsmallest(5, "Best_Alpha")[["Ticker", "Best_Alpha", "Flat%"]].to_string(index=False))
+    print(
+        res_df.nsmallest(5, "Best_Alpha")[["Ticker", "Best_Alpha", "Flat%"]].to_string(index=False)
+    )
     print("\nHighest alpha (trendiest):")
-    print(res_df.nlargest(5, "Best_Alpha")[["Ticker", "Best_Alpha", "Flat%"]].to_string(index=False))
+    print(
+        res_df.nlargest(5, "Best_Alpha")[["Ticker", "Best_Alpha", "Flat%"]].to_string(index=False)
+    )

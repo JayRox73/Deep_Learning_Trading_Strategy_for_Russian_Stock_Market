@@ -1,5 +1,6 @@
 """Record-based walk-forward training for MLP."""
 
+import numpy as np
 import pandas as pd
 import tensorflow as tf
 from sklearn.preprocessing import StandardScaler
@@ -45,9 +46,15 @@ def run_moving_window_backtest(
         n_feat = x_raw.shape[2]
         scaler.fit(x_raw[start:train_end].reshape(-1, n_feat))
 
-        x_train = scaler.transform(x_raw[start:train_end].reshape(-1, n_feat)).reshape(-1, cfg.window_size, n_feat)
-        x_val = scaler.transform(x_raw[train_end:val_end].reshape(-1, n_feat)).reshape(-1, cfg.window_size, n_feat)
-        x_test = scaler.transform(x_raw[val_end:test_end].reshape(-1, n_feat)).reshape(-1, cfg.window_size, n_feat)
+        x_train = scaler.transform(x_raw[start:train_end].reshape(-1, n_feat)).reshape(
+            -1, cfg.window_size, n_feat
+        )
+        x_val = scaler.transform(x_raw[train_end:val_end].reshape(-1, n_feat)).reshape(
+            -1, cfg.window_size, n_feat
+        )
+        x_test = scaler.transform(x_raw[val_end:test_end].reshape(-1, n_feat)).reshape(
+            -1, cfg.window_size, n_feat
+        )
         y_train = y_raw[start:train_end]
         y_val = y_raw[train_end:val_end]
 
@@ -58,9 +65,13 @@ def run_moving_window_backtest(
             l2_decay=cfg.l2_decay,
         )
         classes = np.unique(y_train)
-        class_weight_dict = dict(zip(classes, compute_class_weight("balanced", classes=classes, y=y_train)))
+        class_weight_dict = dict(
+            zip(classes, compute_class_weight("balanced", classes=classes, y=y_train))
+        )
 
-        es = tf.keras.callbacks.EarlyStopping(monitor="val_loss", patience=4, restore_best_weights=True, verbose=0)
+        es = tf.keras.callbacks.EarlyStopping(
+            monitor="val_loss", patience=4, restore_best_weights=True, verbose=0
+        )
         model.fit(
             x_train,
             y_train,

@@ -47,10 +47,14 @@ def backtest_mlp_probabilities(
     df_eval["Equity_Norm"] = df_eval["Equity"] / start_equity
 
     df_eval["Date"] = pd.to_datetime(df_eval["DateTime"]).dt.date
-    daily_returns = df_eval.groupby("Date")["Strategy_Return_Net"].apply(lambda x: (1 + x).prod() - 1)
+    daily_returns = df_eval.groupby("Date")["Strategy_Return_Net"].apply(
+        lambda x: (1 + x).prod() - 1
+    )
     rf_daily = rf_annual / 252
     excess_daily = daily_returns - rf_daily
-    sharpe = (excess_daily.mean() / excess_daily.std()) * np.sqrt(252) if excess_daily.std() > 0 else 0
+    sharpe = (
+        (excess_daily.mean() / excess_daily.std()) * np.sqrt(252) if excess_daily.std() > 0 else 0
+    )
     max_dd = (df_eval["Equity_Norm"] / df_eval["Equity_Norm"].cummax() - 1).min() * 100
     total_return = (df_eval["Equity_Norm"].iloc[-1] / df_eval["Equity_Norm"].iloc[0] - 1) * 100
     total_years = (pd.to_datetime(eval_end) - pd.to_datetime(eval_start)).days / 365.25

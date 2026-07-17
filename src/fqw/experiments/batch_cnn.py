@@ -33,14 +33,14 @@ def _trade_summary_row(
     dt_series = pd.to_datetime(preds_df["DateTime"])
     total_years = max((dt_series.max() - dt_series.min()).days / 365.25, 0.1)
     trades_per_year = n / total_years
-    sharpe = (
-        (pnls_frac.mean() / pnls_frac.std()) * np.sqrt(trades_per_year) if n > 1 else 0
-    )
+    sharpe = (pnls_frac.mean() / pnls_frac.std()) * np.sqrt(trades_per_year) if n > 1 else 0
     mde = 2.8 * pnls_frac.std() / np.sqrt(n) if n > 1 else 0
     stat_sig = abs(pnls_frac.mean()) > mde if n > 1 else False
     max_dd = (
-        trades_df["Cumulative PnL %"] - trades_df["Cumulative PnL %"].cummax()
-    ).min() if "Cumulative PnL %" in trades_df.columns else np.nan
+        (trades_df["Cumulative PnL %"] - trades_df["Cumulative PnL %"].cummax()).min()
+        if "Cumulative PnL %" in trades_df.columns
+        else np.nan
+    )
 
     return {
         "Ticker": ticker,
@@ -111,7 +111,9 @@ def run_batch_backtest_to_csv(
                     min_hold_bars=cfg.window_size,
                 )
             else:
-                trades_df = analyze_trades(preds_df, commission=cfg.commission, rf_annual=cfg.rf_annual)
+                trades_df = analyze_trades(
+                    preds_df, commission=cfg.commission, rf_annual=cfg.rf_annual
+                )
 
             if trades_df is None or trades_df.empty:
                 summary.append(

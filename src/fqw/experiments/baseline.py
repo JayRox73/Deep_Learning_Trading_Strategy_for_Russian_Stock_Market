@@ -126,7 +126,9 @@ def run_regression_backtest(
         z_score = z_pred[i]
         price = prices[i]
         if position_open and (i >= entry_idx + config.horizon or i == len(z_pred) - 1):
-            exit_price = price * (1 - config.slippage) if is_short else price * (1 + config.slippage)
+            exit_price = (
+                price * (1 - config.slippage) if is_short else price * (1 + config.slippage)
+            )
             if is_short:
                 ret = (entry_price - exit_price) / entry_price
                 ret -= config.commission + short_cost_per_bar * (i - entry_idx)
@@ -137,9 +139,19 @@ def run_regression_backtest(
             position_open = False
         if not position_open:
             if z_score > config.z_threshold:
-                position_open, is_short, entry_price, entry_idx = True, False, price * (1 + config.slippage) * (1 + config.commission), i
+                position_open, is_short, entry_price, entry_idx = (
+                    True,
+                    False,
+                    price * (1 + config.slippage) * (1 + config.commission),
+                    i,
+                )
             elif z_score < -config.z_threshold:
-                position_open, is_short, entry_price, entry_idx = True, True, price * (1 - config.slippage) * (1 - config.commission), i
+                position_open, is_short, entry_price, entry_idx = (
+                    True,
+                    True,
+                    price * (1 - config.slippage) * (1 - config.commission),
+                    i,
+                )
         else:
             equity.append(equity[-1])
 
@@ -156,19 +168,35 @@ def run_regression_backtest(
             "total_return": (equity[-1] - 1) * 100,
             "avg_trade": pnls.mean() * 100,
             "profit_factor": gross_profit / gross_loss if gross_loss else float("inf"),
-            "avg_rr": (pnls[pnls > 0].mean() / abs(pnls[pnls < 0].mean())) if (pnls < 0).any() else float("inf"),
-            "sharpe": (np.mean(returns_eq) / np.std(returns_eq) * np.sqrt(config.bars_per_year)) if np.std(returns_eq) > 0 else 0,
+            "avg_rr": (pnls[pnls > 0].mean() / abs(pnls[pnls < 0].mean()))
+            if (pnls < 0).any()
+            else float("inf"),
+            "sharpe": (np.mean(returns_eq) / np.std(returns_eq) * np.sqrt(config.bars_per_year))
+            if np.std(returns_eq) > 0
+            else 0,
             "mde": 2.8 * (pnls.std() / np.sqrt(n)) * 100 if n > 1 else 0,
-            "stat_sig": abs(pnls.mean() * 100) > (2.8 * pnls.std() / np.sqrt(n) * 100) if n > 1 else False,
+            "stat_sig": abs(pnls.mean() * 100) > (2.8 * pnls.std() / np.sqrt(n) * 100)
+            if n > 1
+            else False,
             "equity": equity,
         }
     return {
-        "n_trades": 0, "win_rate": 0, "total_return": 0, "avg_trade": 0,
-        "profit_factor": 0, "avg_rr": 0, "sharpe": 0, "mde": 0, "stat_sig": False, "equity": equity,
+        "n_trades": 0,
+        "win_rate": 0,
+        "total_return": 0,
+        "avg_trade": 0,
+        "profit_factor": 0,
+        "avg_rr": 0,
+        "sharpe": 0,
+        "mde": 0,
+        "stat_sig": False,
+        "equity": equity,
     }
 
 
-def run_baseline_for_ticker(ticker: str, config: BaselineConfig | None = None, verbose: bool = True) -> list[dict]:
+def run_baseline_for_ticker(
+    ticker: str, config: BaselineConfig | None = None, verbose: bool = True
+) -> list[dict]:
     cfg = config or BaselineConfig()
     fpath = cfg.data_dir / f"{ticker}_5min.parquet"
     if not fpath.exists():
@@ -197,7 +225,9 @@ def run_baseline_for_ticker(ticker: str, config: BaselineConfig | None = None, v
     if len(train_df) < 1000 or len(test_df) < 100:
         return []
 
-    feature_cols = [c for c in df.columns if c not in ["DateTime", "target", "raw_target", "rolling_vol"]]
+    feature_cols = [
+        c for c in df.columns if c not in ["DateTime", "target", "raw_target", "rolling_vol"]
+    ]
     x_train_raw = train_df[feature_cols].values
     y_train_arr = train_df["target"].values
     x_test_raw = test_df[feature_cols].values
@@ -229,29 +259,41 @@ def run_baseline_for_ticker(ticker: str, config: BaselineConfig | None = None, v
         mae = mean_absolute_error(y_test_arr * vol_test, y_pred_raw)
         rmse = float(np.sqrt(mean_squared_error(y_test_arr * vol_test, y_pred_raw)))
         metrics = run_regression_backtest(y_pred_norm, prices_test, vol_test, cfg)
-        results_rows.append({
-            "Ticker": ticker, "Model": model_name, "MAE": mae, "RMSE": rmse,
-            "Trades": metrics["n_trades"], "Win Rate %": round(metrics["win_rate"], 1),
-            "Total Return %": round(metrics["total_return"], 2),
-            "Profit Factor": round(metrics["profit_factor"], 2),
-            "Sharpe": round(metrics["sharpe"], 2),
-            "Stat Sig": metrics["stat_sig"],
-            "CV Score": round(cv_score, 4),
-            "Tune Time": round(time.time() - t0, 1),
-            "Best Params": str(best_params),
-        })
+        results_rows.append(
+            {
+                "Ticker": ticker,
+                "Model": model_name,
+                "MAE": mae,
+                "RMSE": rmse,
+                "Trades": metrics["n_trades"],
+                "Win Rate %": round(metrics["win_rate"], 1),
+                "Total Return %": round(metrics["total_return"], 2),
+                "Profit Factor": round(metrics["profit_factor"], 2),
+                "Sharpe": round(metrics["sharpe"], 2),
+                "Stat Sig": metrics["stat_sig"],
+                "CV Score": round(cv_score, 4),
+                "Tune Time": round(time.time() - t0, 1),
+                "Best Params": str(best_params),
+            }
+        )
 
     ridge_z = model_predictions.get("Ridge")
     lgbm_z = model_predictions.get("LightGBM")
     if ridge_z is not None and lgbm_z is not None:
         ensemble_z = (ridge_z + lgbm_z) / 2.0
         metrics_ens = run_regression_backtest(ensemble_z, prices_test, vol_test, cfg)
-        results_rows.append({
-            "Ticker": ticker, "Model": "Ensemble_Ridge_LGBM", "MAE": None, "RMSE": None,
-            "Trades": metrics_ens["n_trades"], "Win Rate %": round(metrics_ens["win_rate"], 1),
-            "Total Return %": round(metrics_ens["total_return"], 2),
-            "Profit Factor": round(metrics_ens["profit_factor"], 2),
-            "Sharpe": round(metrics_ens["sharpe"], 2),
-            "Stat Sig": metrics_ens["stat_sig"],
-        })
+        results_rows.append(
+            {
+                "Ticker": ticker,
+                "Model": "Ensemble_Ridge_LGBM",
+                "MAE": None,
+                "RMSE": None,
+                "Trades": metrics_ens["n_trades"],
+                "Win Rate %": round(metrics_ens["win_rate"], 1),
+                "Total Return %": round(metrics_ens["total_return"], 2),
+                "Profit Factor": round(metrics_ens["profit_factor"], 2),
+                "Sharpe": round(metrics_ens["sharpe"], 2),
+                "Stat Sig": metrics_ens["stat_sig"],
+            }
+        )
     return results_rows

@@ -11,7 +11,9 @@ def build_cnn_model(
     """Regular 1D CNN used in the main thesis pipeline."""
     model = models.Sequential(
         [
-            layers.Conv1D(64, kernel_size=3, padding="same", activation="relu", input_shape=input_shape),
+            layers.Conv1D(
+                64, kernel_size=3, padding="same", activation="relu", input_shape=input_shape
+            ),
             layers.BatchNormalization(),
             layers.Conv1D(128, kernel_size=3, padding="same", activation="relu"),
             layers.BatchNormalization(),

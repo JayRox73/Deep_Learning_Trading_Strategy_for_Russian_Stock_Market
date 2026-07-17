@@ -3,7 +3,6 @@
 from dateutil.relativedelta import relativedelta
 import numpy as np
 import pandas as pd
-import tensorflow as tf
 from sklearn.utils.class_weight import compute_class_weight
 from tensorflow.keras import callbacks
 
@@ -22,11 +21,15 @@ def run_cdt_backtest(
     alpha: float | None = None,
 ) -> dict | None:
     cfg = config or CDTConfig()
-    confidence_threshold = cfg.confidence_threshold if confidence_threshold is None else confidence_threshold
+    confidence_threshold = (
+        cfg.confidence_threshold if confidence_threshold is None else confidence_threshold
+    )
     alpha = cfg.alpha if alpha is None else alpha
 
     print(f"\n{'=' * 70}\n  {model_name} ({len(feature_cols)} features)\n{'=' * 70}")
-    x_all, y_all, dates_all, prices_all = create_tensors_cdt(df, feature_cols, cfg.window_size, alpha)
+    x_all, y_all, dates_all, prices_all = create_tensors_cdt(
+        df, feature_cols, cfg.window_size, alpha
+    )
     if len(x_all) == 0:
         return None
 
@@ -56,7 +59,9 @@ def run_cdt_backtest(
         batch_size=cfg.batch_size,
         validation_split=0.05,
         class_weight=cw_dict,
-        callbacks=[callbacks.EarlyStopping(monitor="val_loss", patience=3, restore_best_weights=True)],
+        callbacks=[
+            callbacks.EarlyStopping(monitor="val_loss", patience=3, restore_best_weights=True)
+        ],
         verbose=0,
     )
 
@@ -69,7 +74,10 @@ def run_cdt_backtest(
         if len(xt) == 0:
             break
         probs = model.predict(xt, verbose=0)
-        pr = [1 if p[1] > confidence_threshold else 2 if p[2] > confidence_threshold else 0 for p in probs]
+        pr = [
+            1 if p[1] > confidence_threshold else 2 if p[2] > confidence_threshold else 0
+            for p in probs
+        ]
         preds_all.extend(pr)
         acts_all.extend(yt)
         dates_out.extend(dates_all[mask])

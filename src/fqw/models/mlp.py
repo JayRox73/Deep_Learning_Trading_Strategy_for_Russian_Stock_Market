@@ -13,17 +13,47 @@ def build_mlp_model(
     model = models.Sequential(
         [
             layers.Flatten(input_shape=input_shape, name="flatten_mlp"),
-            layers.Dense(300, activation="relu", kernel_initializer="he_normal", kernel_regularizer=regularizers.l2(l2_decay)),
+            layers.Dense(
+                300,
+                activation="relu",
+                kernel_initializer="he_normal",
+                kernel_regularizer=regularizers.l2(l2_decay),
+            ),
             layers.Dropout(dropout),
-            layers.Dense(200, activation="relu", kernel_initializer="he_normal", kernel_regularizer=regularizers.l2(l2_decay)),
+            layers.Dense(
+                200,
+                activation="relu",
+                kernel_initializer="he_normal",
+                kernel_regularizer=regularizers.l2(l2_decay),
+            ),
             layers.Dropout(dropout),
-            layers.Dense(100, activation="relu", kernel_initializer="he_normal", kernel_regularizer=regularizers.l2(l2_decay)),
+            layers.Dense(
+                100,
+                activation="relu",
+                kernel_initializer="he_normal",
+                kernel_regularizer=regularizers.l2(l2_decay),
+            ),
             layers.Dropout(dropout),
-            layers.Dense(50, activation="relu", kernel_initializer="he_normal", kernel_regularizer=regularizers.l2(l2_decay)),
+            layers.Dense(
+                50,
+                activation="relu",
+                kernel_initializer="he_normal",
+                kernel_regularizer=regularizers.l2(l2_decay),
+            ),
             layers.Dropout(dropout),
-            layers.Dense(25, activation="relu", kernel_initializer="he_normal", kernel_regularizer=regularizers.l2(l2_decay)),
+            layers.Dense(
+                25,
+                activation="relu",
+                kernel_initializer="he_normal",
+                kernel_regularizer=regularizers.l2(l2_decay),
+            ),
             layers.Dropout(dropout),
-            layers.Dense(10, activation="relu", kernel_initializer="he_normal", kernel_regularizer=regularizers.l2(l2_decay)),
+            layers.Dense(
+                10,
+                activation="relu",
+                kernel_initializer="he_normal",
+                kernel_regularizer=regularizers.l2(l2_decay),
+            ),
             layers.Dropout(dropout),
             layers.Dense(3, activation="softmax", dtype="float32", name="output_mlp"),
         ]

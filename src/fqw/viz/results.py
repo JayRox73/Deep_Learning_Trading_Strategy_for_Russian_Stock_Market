@@ -30,7 +30,9 @@ def calculate_comprehensive_metrics(
     df = df.copy().sort_values("DateTime")
     if pd.api.types.is_integer_dtype(df["DateTime"]):
         max_val = df["DateTime"].max()
-        unit = "ns" if max_val > 1e17 else "us" if max_val > 1e14 else "ms" if max_val > 1e11 else "s"
+        unit = (
+            "ns" if max_val > 1e17 else "us" if max_val > 1e14 else "ms" if max_val > 1e11 else "s"
+        )
         df["DateTime"] = pd.to_datetime(df["DateTime"], unit=unit)
     else:
         df["DateTime"] = pd.to_datetime(df["DateTime"], errors="coerce")
@@ -70,10 +72,14 @@ def calculate_comprehensive_metrics(
     max_dd = ((df_eval["Equity_Norm"] / df_eval["Equity_Norm"].cummax() - 1).min()) * 100
 
     df_eval["Date"] = df_eval["DateTime"].dt.date
-    daily_returns = df_eval.groupby("Date")["Strategy_Return_Net"].apply(lambda x: (1 + x).prod() - 1)
+    daily_returns = df_eval.groupby("Date")["Strategy_Return_Net"].apply(
+        lambda x: (1 + x).prod() - 1
+    )
     rf_daily = rf_annual / 252
     excess_daily = daily_returns - rf_daily
-    sharpe = (excess_daily.mean() / excess_daily.std()) * np.sqrt(252) if excess_daily.std() > 0 else 0
+    sharpe = (
+        (excess_daily.mean() / excess_daily.std()) * np.sqrt(252) if excess_daily.std() > 0 else 0
+    )
     gross_profit = daily_returns[daily_returns > 0].sum()
     gross_loss = abs(daily_returns[daily_returns < 0].sum())
     profit_factor = gross_profit / gross_loss if gross_loss > 0 else np.inf
@@ -129,9 +135,16 @@ def plot_equity_curves(data_store: dict, plots_dir: Path | str, colors: dict | N
         models_data = data_store[ticker]
         first_model_df = list(models_data.values())[0][0]
         bh_norm = first_model_df["Price"] / first_model_df["Price"].iloc[0]
-        ax.plot(first_model_df["DateTime"], bh_norm, label="Buy & Hold", linestyle="--", color="#888888")
+        ax.plot(
+            first_model_df["DateTime"], bh_norm, label="Buy & Hold", linestyle="--", color="#888888"
+        )
         for model_key, (df_eval, _, alpha_val, model_name) in models_data.items():
-            ax.plot(df_eval["DateTime"], df_eval["Equity_Norm"], label=f"{model_name} (α={alpha_val})", color=colors.get(model_key, None))
+            ax.plot(
+                df_eval["DateTime"],
+                df_eval["Equity_Norm"],
+                label=f"{model_name} (α={alpha_val})",
+                color=colors.get(model_key, None),
+            )
         ax.set_title(ticker)
         ax.legend(loc="upper left", fontsize=8, ncol=2)
         ax.axhline(1.0, color="black", alpha=0.2)
@@ -140,33 +153,61 @@ def plot_equity_curves(data_store: dict, plots_dir: Path | str, colors: dict | N
     plt.close()
 
 
-def plot_metrics_comparison(metrics_df: pd.DataFrame, plots_dir: Path | str, colors: dict | None = None):
+def plot_metrics_comparison(
+    metrics_df: pd.DataFrame, plots_dir: Path | str, colors: dict | None = None
+):
     if metrics_df.empty:
         return
     plots_dir = Path(plots_dir)
-    best_df = metrics_df.loc[metrics_df.groupby(["Ticker", "Model", "Alpha"])["Sharpe"].idxmax()].copy()
+    best_df = metrics_df.loc[
+        metrics_df.groupby(["Ticker", "Model", "Alpha"])["Sharpe"].idxmax()
+    ].copy()
     best_df["Model_Alpha"] = best_df["Model"] + " [α=" + best_df["Alpha"].astype(str) + "]"
     fig, axes = plt.subplots(2, 2, figsize=(16, 10))
     palette = colors or "colorblind"
-    sns.barplot(data=best_df, x="Ticker", y="Return, %", hue="Model_Alpha", ax=axes[0, 0], palette=palette)
-    sns.barplot(data=best_df, x="Ticker", y="Sharpe", hue="Model_Alpha", ax=axes[0, 1], palette=palette)
-    sns.barplot(data=best_df, x="Ticker", y="Profit Factor", hue="Model_Alpha", ax=axes[1, 0], palette=palette)
-    sns.barplot(data=best_df, x="Ticker", y="WFS", hue="Model_Alpha", ax=axes[1, 1], palette=palette)
+    sns.barplot(
+        data=best_df, x="Ticker", y="Return, %", hue="Model_Alpha", ax=axes[0, 0], palette=palette
+    )
+    sns.barplot(
+        data=best_df, x="Ticker", y="Sharpe", hue="Model_Alpha", ax=axes[0, 1], palette=palette
+    )
+    sns.barplot(
+        data=best_df,
+        x="Ticker",
+        y="Profit Factor",
+        hue="Model_Alpha",
+        ax=axes[1, 0],
+        palette=palette,
+    )
+    sns.barplot(
+        data=best_df, x="Ticker", y="WFS", hue="Model_Alpha", ax=axes[1, 1], palette=palette
+    )
     plt.tight_layout()
     plt.savefig(plots_dir / "metrics_comparison.png", bbox_inches="tight")
     plt.close()
 
 
-def plot_risk_return_scatter(metrics_df: pd.DataFrame, plots_dir: Path | str, colors: dict | None = None):
+def plot_risk_return_scatter(
+    metrics_df: pd.DataFrame, plots_dir: Path | str, colors: dict | None = None
+):
     if metrics_df.empty:
         return
     plots_dir = Path(plots_dir)
-    best_df = metrics_df.loc[metrics_df.groupby(["Ticker", "Model", "Alpha"])["Sharpe"].idxmax()].copy()
+    best_df = metrics_df.loc[
+        metrics_df.groupby(["Ticker", "Model", "Alpha"])["Sharpe"].idxmax()
+    ].copy()
     best_df["Model_Alpha"] = best_df["Model"] + " [α=" + best_df["Alpha"].astype(str) + "]"
     plt.figure(figsize=(10, 7))
     sns.scatterplot(
-        data=best_df, x="Sharpe", y="Return, %", hue="Model_Alpha", style="Ticker",
-        s=150, palette=colors or "colorblind", edgecolor="black", linewidth=0.8,
+        data=best_df,
+        x="Sharpe",
+        y="Return, %",
+        hue="Model_Alpha",
+        style="Ticker",
+        s=150,
+        palette=colors or "colorblind",
+        edgecolor="black",
+        linewidth=0.8,
     )
     plt.axhline(0, color="gray", linestyle="--")
     plt.axvline(0, color="gray", linestyle="--")
@@ -179,13 +220,28 @@ def plot_correlation_heatmap(metrics_df: pd.DataFrame, plots_dir: Path | str):
     if metrics_df.empty:
         return
     plots_dir = Path(plots_dir)
-    numeric_cols = ["WFS", "Win Rate %", "Return, %", "Sharpe", "Profit Factor", "Max DD, %", "Trades"]
+    numeric_cols = [
+        "WFS",
+        "Win Rate %",
+        "Return, %",
+        "Sharpe",
+        "Profit Factor",
+        "Max DD, %",
+        "Trades",
+    ]
     corr_matrix = metrics_df[numeric_cols].corr()
     plt.figure(figsize=(8, 6))
     mask = np.triu(np.ones_like(corr_matrix, dtype=bool))
     sns.heatmap(
-        corr_matrix, annot=True, cmap="coolwarm", center=0, fmt=".2f",
-        square=True, linewidths=0.5, mask=mask, cbar_kws={"shrink": 0.8},
+        corr_matrix,
+        annot=True,
+        cmap="coolwarm",
+        center=0,
+        fmt=".2f",
+        square=True,
+        linewidths=0.5,
+        mask=mask,
+        cbar_kws={"shrink": 0.8},
     )
     plt.title("Correlation Matrix of Strategy Metrics")
     plt.tight_layout()
@@ -199,15 +255,27 @@ def scan_probability_results(
 ) -> tuple[pd.DataFrame, dict, dict]:
     """Scan result directories for *_probs.parquet and compute metrics per threshold."""
     project_dirs = project_dirs or DEFAULT_PROJECT_DIRS
-    threshold_range = threshold_range if threshold_range is not None else np.arange(0.10, 0.90, 0.05)
+    threshold_range = (
+        threshold_range if threshold_range is not None else np.arange(0.10, 0.90, 0.05)
+    )
 
     all_metrics_rows = []
     equity_curves_store: dict = {}
     colors_dynamic: dict = {}
     color_counter = 0
     unique_palette = [
-        "#e6194B", "#3cb44b", "#4363d8", "#f58231", "#911eb4", "#42d4f4",
-        "#f032e6", "#bfef45", "#fabed4", "#469990", "#dcbeff", "#9A6324",
+        "#e6194B",
+        "#3cb44b",
+        "#4363d8",
+        "#f58231",
+        "#911eb4",
+        "#42d4f4",
+        "#f032e6",
+        "#bfef45",
+        "#fabed4",
+        "#469990",
+        "#dcbeff",
+        "#9A6324",
     ]
 
     for proj_dir, short_id, display_base in project_dirs:
@@ -235,7 +303,9 @@ def scan_probability_results(
             model_name = f"{display_base} ({variant})" if variant else display_base
             model_alpha_key = f"{model_name} [α={alpha_val}]"
             if model_alpha_key not in colors_dynamic:
-                colors_dynamic[model_alpha_key] = unique_palette[color_counter % len(unique_palette)]
+                colors_dynamic[model_alpha_key] = unique_palette[
+                    color_counter % len(unique_palette)
+                ]
                 color_counter += 1
             colors_dynamic["Buy_Hold"] = "#888888"
 
@@ -244,7 +314,12 @@ def scan_probability_results(
             for thresh in threshold_range:
                 eval_df, metrics = calculate_comprehensive_metrics(df_raw, threshold=thresh)
                 if metrics and metrics["Trades"] > 0:
-                    row = {"Ticker": ticker, "Model": model_name, "Alpha": alpha_val, "Threshold": thresh}
+                    row = {
+                        "Ticker": ticker,
+                        "Model": model_name,
+                        "Alpha": alpha_val,
+                        "Threshold": thresh,
+                    }
                     row.update(metrics)
                     all_metrics_rows.append(row)
                     if metrics["Sharpe"] > best_sharpe:
@@ -252,8 +327,13 @@ def scan_probability_results(
                         best_eval_df, best_metrics = eval_df, metrics
             if best_eval_df is not None:
                 equity_curves_store.setdefault(ticker, {})[model_alpha_key] = (
-                    best_eval_df, best_thresh, alpha_val, model_name,
+                    best_eval_df,
+                    best_thresh,
+                    alpha_val,
+                    model_name,
                 )
-                print(f"  {ticker} | {model_name} [α={alpha_val}]: Sharpe={best_metrics['Sharpe']:.2f}")
+                print(
+                    f"  {ticker} | {model_name} [α={alpha_val}]: Sharpe={best_metrics['Sharpe']:.2f}"
+                )
 
     return pd.DataFrame(all_metrics_rows), equity_curves_store, colors_dynamic
